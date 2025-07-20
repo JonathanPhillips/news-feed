@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI News Feed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .controls {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .select {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            background: white;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .article-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        }
+
+        .article-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .article-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .article-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .article-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .article-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .article-category {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 500;
+        }
+
+        .article-sentiment {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 500;
+        }
+
+        .sentiment-positive { background: #dcfce7; color: #166534; }
+        .sentiment-negative { background: #fef2f2; color: #dc2626; }
+        .sentiment-neutral { background: #f3f4f6; color: #374151; }
+
+        .bias-indicator {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 500;
+            font-size: 0.7rem;
+            position: relative;
+        }
+
+        .bias-left-strong { background: #1e40af; color: white; }
+        .bias-left-slight { background: #60a5fa; color: white; }
+        .bias-neutral { background: #f3f4f6; color: #374151; }
+        .bias-right-slight { background: #f87171; color: white; }
+        .bias-right-strong { background: #dc2626; color: white; }
+
+        .bias-scale {
+            width: 100px;
+            height: 6px;
+            background: linear-gradient(to right, #1e40af, #60a5fa, #f3f4f6, #f87171, #dc2626);
+            border-radius: 3px;
+            position: relative;
+            margin: 0.25rem 0;
+        }
+
+        .bias-marker {
+            position: absolute;
+            top: -2px;
+            width: 10px;
+            height: 10px;
+            background: #000;
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+
+        .article-content {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .article-summary {
+            color: #4b5563;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .article-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            background: none;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .ai-summary-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .ai-summary-btn:hover {
+            background: #059669;
+        }
+
+        .ai-summary-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .ai-summary {
+            background: #f0f9ff;
+            border-left: 4px solid #0284c7;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.25rem;
+            font-style: italic;
+            color: #0c4a6e;
+        }
+
+        .bias-analysis-btn {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .bias-analysis-btn:hover {
+            background: #7c3aed;
+        }
+
+        .bias-analysis-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            width: 80%;
+            max-width: 700px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e5e5e5;
+            padding-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .bias-score-display {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .bias-score-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .bias-score-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .bias-confidence {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .bias-reasoning {
+            background: #fffbeb;
+            border: 1px solid #fbbf24;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .bias-reasoning h4 {
+            margin-bottom: 1rem;
+            color: #92400e;
+            font-weight: 600;
+        }
+
+        .bias-reasoning p {
+            line-height: 1.6;
+            color: #451a03;
+        }
+
+        .relevance-indicator {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        .relevance-low { background: #ef4444; }
+        .relevance-medium { background: #f59e0b; }
+        .relevance-high { background: #10b981; }
+
+        .no-articles {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .status-online { background: #10b981; }
+        .status-offline { background: #ef4444; }
+        
+        .preference-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .preference-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .preference-category {
+            font-weight: 600;
+            color: #111827;
+            text-transform: capitalize;
+        }
+        
+        .preference-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .keyword-tag {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        
+        .keyword-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+        }
+        
+        .preference-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .save-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        
+        .save-btn:hover {
+            background: #059669;
+        }
+        
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🤖 AI News Feed</h1>
+    </header>
+
+    <div class="controls">
+        <button id="refreshBtn" class="btn">🔄 Refresh Feeds</button>
+        <button id="preferencesBtn" class="btn">⚙️ Preferences</button>
+        <select id="categoryFilter" class="select">
+            <option value="">All Categories</option>
+            <option value="technology">Technology</option>
+            <option value="politics">Politics</option>
+            <option value="business">Business</option>
+            <option value="science">Science</option>
+            <option value="health">Health</option>
+            <option value="sports">Sports</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="fashion">Fashion</option>
+            <option value="world">World</option>
+        </select>
+        <div>
+            <span class="status-indicator status-offline" id="statusIndicator"></span>
+            <span id="statusText">Checking connection...</span>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <div id="loading" class="loading">Loading articles...</div>
+        <div id="articlesContainer" class="article-grid" style="display: none;"></div>
+        <div id="noArticles" class="no-articles" style="display: none;">
+            <h3>No articles found</h3>
+            <p>Try refreshing the feeds or adjusting your filters.</p>
+        </div>
+    </main>
+
+    <!-- Bias Analysis Modal -->
+    <div id="biasModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">🎯 Political Bias Analysis</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div id="biasModalContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Preferences Modal -->
+    <div id="preferencesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">⚙️ Category Preferences</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div id="preferencesContent">
+                <p style="margin-bottom: 1rem; color: #6b7280;">Set keywords for each category to boost relevant articles:</p>
+                <div id="preferencesList">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <button id="addPreferenceBtn" class="btn" style="margin-top: 1rem;">➕ Add New Preference</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class NewsFeedApp {
+            constructor() {
+                // Use relative URL for Docker deployment, fallback to localhost for dev
+                this.apiUrl = window.location.hostname === 'localhost' && window.location.port !== '3000' 
+                    ? 'http://localhost:8000' 
+                    : '/api';
+                this.articles = [];
+                this.currentCategory = '';
+                this.init();
+                this.setupModalEvents();
+            }
+
+            async init() {
+                this.setupEventListeners();
+                await this.checkHealth();
+                await this.loadArticles();
+                await this.loadPreferences();
+            }
+
+            setupEventListeners() {
+                document.getElementById('refreshBtn').addEventListener('click', () => this.refreshFeeds());
+                document.getElementById('preferencesBtn').addEventListener('click', () => this.showPreferences());
+                document.getElementById('categoryFilter').addEventListener('change', (e) => {
+                    this.currentCategory = e.target.value;
+                    this.loadArticles();
+                });
+                document.getElementById('addPreferenceBtn').addEventListener('click', () => this.addNewPreference());
+            }
+
+            async checkHealth() {
+                try {
+                    const response = await fetch(`${this.apiUrl}/health`);
+                    const data = await response.json();
+                    
+                    const indicator = document.getElementById('statusIndicator');
+                    const text = document.getElementById('statusText');
+                    
+                    if (data.status === 'healthy') {
+                        indicator.className = 'status-indicator status-online';
+                        text.textContent = data.lm_studio_available ? 'Online (AI Available)' : 'Online (AI Offline)';
+                    } else {
+                        indicator.className = 'status-indicator status-offline';
+                        text.textContent = 'Backend Offline';
+                    }
+                } catch (error) {
+                    const indicator = document.getElementById('statusIndicator');
+                    const text = document.getElementById('statusText');
+                    indicator.className = 'status-indicator status-offline';
+                    text.textContent = 'Backend Offline';
+                }
+            }
+
+            async loadArticles() {
+                this.showLoading();
+                
+                try {
+                    const params = new URLSearchParams({
+                        limit: '20',
+                        offset: '0'
+                    });
+                    
+                    if (this.currentCategory) {
+                        params.append('category', this.currentCategory);
+                    }
+                    
+                    const response = await fetch(`${this.apiUrl}/articles?${params}`);
+                    const data = await response.json();
+                    
+                    this.articles = data.articles;
+                    this.renderArticles();
+                } catch (error) {
+                    console.error('Error loading articles:', error);
+                    this.showNoArticles();
+                }
+            }
+
+            async refreshFeeds() {
+                const btn = document.getElementById('refreshBtn');
+                btn.disabled = true;
+                btn.textContent = '🔄 Refreshing...';
+                
+                try {
+                    await fetch(`${this.apiUrl}/refresh`, { method: 'POST' });
+                    await this.loadArticles();
+                } catch (error) {
+                    console.error('Error refreshing feeds:', error);
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = '🔄 Refresh Feeds';
+                }
+            }
+
+            showLoading() {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('articlesContainer').style.display = 'none';
+                document.getElementById('noArticles').style.display = 'none';
+            }
+
+            showNoArticles() {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('articlesContainer').style.display = 'none';
+                document.getElementById('noArticles').style.display = 'block';
+            }
+
+            renderArticles() {
+                const container = document.getElementById('articlesContainer');
+                
+                if (this.articles.length === 0) {
+                    this.showNoArticles();
+                    return;
+                }
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('noArticles').style.display = 'none';
+                container.style.display = 'grid';
+                
+                container.innerHTML = this.articles.map(article => this.createArticleCard(article)).join('');
+                
+                // Add click listeners
+                container.querySelectorAll('.article-card').forEach((card, index) => {
+                    card.addEventListener('click', () => this.openArticle(this.articles[index]));
+                });
+            }
+
+            createArticleCard(article) {
+                const relevanceClass = article.relevance_score > 0.7 ? 'relevance-high' : 
+                                     article.relevance_score > 0.4 ? 'relevance-medium' : 'relevance-low';
+                
+                const sentimentClass = `sentiment-${article.sentiment || 'neutral'}`;
+                
+                // Political bias analysis
+                const bias = article.political_bias || 0;
+                const biasConfidence = article.bias_confidence || 0;
+                let biasDisplay = '';
+                
+                if (biasConfidence > 0.3) { // Only show bias if confidence is reasonable
+                    const biasClass = bias <= -0.5 ? 'bias-left-strong' :
+                                     bias <= -0.2 ? 'bias-left-slight' :
+                                     bias >= 0.5 ? 'bias-right-strong' :
+                                     bias >= 0.2 ? 'bias-right-slight' : 'bias-neutral';
+                    
+                    const biasText = bias <= -0.5 ? 'Left' :
+                                    bias <= -0.2 ? 'Left-lean' :
+                                    bias >= 0.5 ? 'Right' :
+                                    bias >= 0.2 ? 'Right-lean' : 'Neutral';
+                    
+                    const biasPosition = ((bias + 1) / 2) * 100; // Convert -1,1 to 0,100
+                    
+                    biasDisplay = `
+                        <div class="bias-indicator ${biasClass}" title="Political Bias: ${biasText} (${bias.toFixed(2)})">
+                            ${biasText}
+                        </div>
+                        <div class="bias-scale">
+                            <div class="bias-marker" style="left: ${biasPosition}%"></div>
+                        </div>
+                    `;
+                }
+                
+                // Add bias analysis button if bias data is available
+                let biasAnalysisBtn = '';
+                if (biasConfidence > 0.1) { // Show button if there's any bias data
+                    biasAnalysisBtn = `<button class="bias-analysis-btn" onclick="event.stopPropagation(); newsApp.showBiasAnalysis(${article.id})" title="View detailed bias analysis">🎯 Bias Analysis</button>`;
+                }
+                
+                return `
+                    <div class="article-card" data-article-id="${article.id}">
+                        <div class="relevance-indicator ${relevanceClass}"></div>
+                        <div class="article-header">
+                            <h3 class="article-title">${article.title}</h3>
+                            <div class="article-meta">
+                                <span class="article-category">${article.category || 'Uncategorized'}</span>
+                                <span class="article-sentiment ${sentimentClass}">${article.sentiment || 'neutral'}</span>
+                                ${biasDisplay}
+                                <span>${new Date(article.published).toLocaleDateString()}</span>
+                                <span>by ${article.author || 'Unknown'}</span>
+                            </div>
+                        </div>
+                        <div class="article-content">
+                            <p class="article-summary">${article.summary || article.content?.substring(0, 200) + '...' || 'No summary available.'}</p>
+                            <div id="ai-summary-${article.id}" class="ai-summary" style="display: none;"></div>
+                            <div class="article-actions">
+                                <button class="ai-summary-btn" onclick="event.stopPropagation(); newsApp.generateAISummary(${article.id})" id="summary-btn-${article.id}">🤖 AI Summary</button>
+                                ${biasAnalysisBtn}
+                                <button class="action-btn" onclick="event.stopPropagation(); window.open('${article.url}', '_blank')">Read Full</button>
+                                <button class="action-btn" onclick="event.stopPropagation(); newsApp.recordInteraction(${article.id}, 'like')">👍</button>
+                                <button class="action-btn" onclick="event.stopPropagation(); newsApp.recordInteraction(${article.id}, 'dislike')">👎</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            openArticle(article) {
+                this.recordInteraction(article.id, 'view');
+                window.open(article.url, '_blank');
+            }
+
+            async recordInteraction(articleId, action, value = 1.0) {
+                try {
+                    await fetch(`${this.apiUrl}/articles/${articleId}/interact`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action, value })
+                    });
+                } catch (error) {
+                    console.error('Error recording interaction:', error);
+                }
+            }
+
+            setupModalEvents() {
+                // Bias modal
+                const biasModal = document.getElementById('biasModal');
+                const biasCloseBtn = biasModal.querySelector('.close');
+                
+                biasCloseBtn.addEventListener('click', () => {
+                    biasModal.style.display = 'none';
+                });
+                
+                // Preferences modal
+                const prefModal = document.getElementById('preferencesModal');
+                const prefCloseBtn = prefModal.querySelector('.close');
+                
+                prefCloseBtn.addEventListener('click', () => {
+                    prefModal.style.display = 'none';
+                });
+                
+                // Close modals when clicking outside
+                window.addEventListener('click', (event) => {
+                    if (event.target === biasModal) {
+                        biasModal.style.display = 'none';
+                    }
+                    if (event.target === prefModal) {
+                        prefModal.style.display = 'none';
+                    }
+                });
+            }
+
+            async generateAISummary(articleId) {
+                const button = document.getElementById(`summary-btn-${articleId}`);
+                const summaryDiv = document.getElementById(`ai-summary-${articleId}`);
+                
+                // Disable button and show loading
+                button.disabled = true;
+                button.textContent = '🤖 Generating...';
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/articles/${articleId}/summary`, {
+                        method: 'POST'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Show the summary
+                    summaryDiv.innerHTML = `
+                        <strong>🤖 AI Summary:</strong><br>
+                        ${data.summary}
+                        ${data.cached ? '<br><small>(Cached)</small>' : '<br><small>(Fresh)</small>'}
+                    `;
+                    summaryDiv.style.display = 'block';
+                    
+                    // Update button
+                    button.textContent = '✅ Summary';
+                    button.disabled = true;
+                    
+                    // Record interaction
+                    this.recordInteraction(articleId, 'ai_summary');
+                    
+                } catch (error) {
+                    console.error('Error generating summary:', error);
+                    summaryDiv.innerHTML = `
+                        <strong>❌ Error:</strong><br>
+                        Failed to generate summary. ${error.message.includes('503') ? 'AI service unavailable.' : 'Please try again.'}
+                    `;
+                    summaryDiv.style.display = 'block';
+                    
+                    // Reset button
+                    button.disabled = false;
+                    button.textContent = '🤖 AI Summary';
+                }
+            }
+
+            async showBiasAnalysis(articleId) {
+                const modal = document.getElementById('biasModal');
+                const content = document.getElementById('biasModalContent');
+                
+                // Show loading state
+                content.innerHTML = '<div style="text-align: center; padding: 2rem;">🔄 Loading bias analysis...</div>';
+                modal.style.display = 'block';
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/articles/${articleId}/bias-analysis`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Determine bias color for score display
+                    const bias = data.political_bias;
+                    let scoreColor = '#6b7280'; // neutral gray
+                    if (bias <= -0.5) scoreColor = '#1e40af'; // strong left - blue
+                    else if (bias <= -0.2) scoreColor = '#60a5fa'; // slight left - light blue
+                    else if (bias >= 0.5) scoreColor = '#dc2626'; // strong right - red
+                    else if (bias >= 0.2) scoreColor = '#f87171'; // slight right - light red
+                    
+                    // Populate modal content
+                    content.innerHTML = `
+                        <h3 style="margin-bottom: 1rem; color: #374151;">${data.title}</h3>
+                        
+                        <div class="bias-score-display">
+                            <div class="bias-score-number" style="color: ${scoreColor};">
+                                ${bias.toFixed(2)}
+                            </div>
+                            <div class="bias-score-label" style="color: ${scoreColor};">
+                                ${data.bias_label}
+                            </div>
+                            <div class="bias-confidence">
+                                Confidence: ${(data.bias_confidence * 100).toFixed(0)}%
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #6b7280;">
+                                ${data.bias_interpretation}
+                            </div>
+                        </div>
+                        
+                        <div class="bias-reasoning">
+                            <h4>🧠 AI Reasoning</h4>
+                            <p>${data.bias_reasoning || 'No detailed reasoning available for this article.'}</p>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: #f3f4f6; border-radius: 0.5rem; font-size: 0.9rem; color: #6b7280;">
+                            <strong>Note:</strong> This bias analysis is generated by AI and represents an algorithmic assessment of language patterns, framing, and perspective indicators. It should be considered as one data point among many when evaluating news content.
+                        </div>
+                    `;
+                    
+                    // Record interaction
+                    this.recordInteraction(articleId, 'bias_analysis');
+                    
+                } catch (error) {
+                    console.error('Error loading bias analysis:', error);
+                    content.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: #dc2626;">
+                            <h3>❌ Error Loading Analysis</h3>
+                            <p>Failed to load bias analysis. ${error.message.includes('404') ? 'Article not found.' : 'Please try again.'}</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            async loadPreferences() {
+                try {
+                    const response = await fetch(`${this.apiUrl}/preferences`);
+                    this.preferences = await response.json();
+                } catch (error) {
+                    console.error('Error loading preferences:', error);
+                    this.preferences = [];
+                }
+            }
+            
+            showPreferences() {
+                const modal = document.getElementById('preferencesModal');
+                this.renderPreferences();
+                modal.style.display = 'block';
+            }
+            
+            renderPreferences() {
+                const container = document.getElementById('preferencesList');
+                
+                if (!this.preferences || this.preferences.length === 0) {
+                    container.innerHTML = '<p style="color: #6b7280;">No preferences set yet. Add some to boost relevant articles!</p>';
+                    return;
+                }
+                
+                container.innerHTML = this.preferences.map(pref => `
+                    <div class="preference-item" data-category="${pref.category}">
+                        <div class="preference-header">
+                            <span class="preference-category">${pref.category}</span>
+                            <button class="delete-btn" onclick="newsApp.deletePreference('${pref.category}')">Delete</button>
+                        </div>
+                        <div class="preference-keywords">
+                            ${pref.keywords.map(keyword => `<span class="keyword-tag">${keyword}</span>`).join('')}
+                        </div>
+                        <input type="text" class="keyword-input" placeholder="Add keywords separated by commas" id="input-${pref.category}">
+                        <div class="preference-actions">
+                            <button class="save-btn" onclick="newsApp.updatePreference('${pref.category}')">Update Keywords</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            addNewPreference() {
+                const category = prompt('Enter category name (e.g., sports, technology, fashion):');
+                if (!category) return;
+                
+                const keywords = prompt('Enter keywords separated by commas:');
+                if (!keywords) return;
+                
+                const keywordArray = keywords.split(',').map(k => k.trim()).filter(k => k);
+                if (keywordArray.length === 0) return;
+                
+                this.savePreference(category.toLowerCase(), keywordArray);
+            }
+            
+            async updatePreference(category) {
+                const input = document.getElementById(`input-${category}`);
+                const newKeywords = input.value.split(',').map(k => k.trim()).filter(k => k);
+                
+                if (newKeywords.length === 0) return;
+                
+                const existingPref = this.preferences.find(p => p.category === category);
+                const allKeywords = [...(existingPref?.keywords || []), ...newKeywords];
+                const uniqueKeywords = [...new Set(allKeywords)];
+                
+                await this.savePreference(category, uniqueKeywords);
+                input.value = '';
+            }
+            
+            async savePreference(category, keywords) {
+                try {
+                    const response = await fetch(`${this.apiUrl}/preferences`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ category, keywords, priority: 1.0 })
+                    });
+                    
+                    if (response.ok) {
+                        await this.loadPreferences();
+                        this.renderPreferences();
+                        alert(`Preference saved! Articles about ${keywords.join(', ')} in ${category} will be boosted.`);
+                    }
+                } catch (error) {
+                    console.error('Error saving preference:', error);
+                    alert('Failed to save preference');
+                }
+            }
+            
+            async deletePreference(category) {
+                if (!confirm(`Delete preference for ${category}?`)) return;
+                
+                try {
+                    const response = await fetch(`${this.apiUrl}/preferences/${category}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        await this.loadPreferences();
+                        this.renderPreferences();
+                    }
+                } catch (error) {
+                    console.error('Error deleting preference:', error);
+                }
+            }
+        }
+
+        // Initialize the app
+        const newsApp = new NewsFeedApp();
+    </script>
+</body>
+</html>

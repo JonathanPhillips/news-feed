@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+
+# Claude artifacts
+.claude/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environment
+venv/
+ENV/
+
+# Local development files (not in tests/ directory)
+debug_*.py
+add_*.py
+migrate_*.py
+get-pip.py
+news_feed.db
+
+# But allow test files in tests/ directory
+!tests/test_*.py
