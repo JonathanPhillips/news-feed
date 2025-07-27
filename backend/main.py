@@ -40,6 +40,7 @@ class InteractionRequest(BaseModel):
 
 class FeedRequest(BaseModel):
     url: str
+    category: str = None
 
 class PreferenceRequest(BaseModel):
     category: str
@@ -106,6 +107,9 @@ async def add_feed(request: FeedRequest) -> Dict[str, Any]:
     """Add a new RSS feed."""
     try:
         feed_info = parser.get_feed_info(request.url)
+        # Add category to feed info
+        if request.category:
+            feed_info['category'] = request.category
         feed_id = db.insert_feed(feed_info)
         
         if feed_id:
@@ -113,6 +117,18 @@ async def add_feed(request: FeedRequest) -> Dict[str, Any]:
         else:
             raise HTTPException(status_code=400, detail="Failed to add feed")
             
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.delete("/feeds/{feed_id}")
+async def delete_feed(feed_id: int) -> Dict[str, Any]:
+    """Delete an RSS feed."""
+    try:
+        success = db.delete_feed(feed_id)
+        if success:
+            return {"message": "Feed deleted successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Feed not found")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

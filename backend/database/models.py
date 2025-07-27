@@ -105,6 +105,14 @@ class DatabaseManager:
             except sqlite3.OperationalError:
                 # Column already exists
                 pass
+                
+            # Add category column to feeds table if it doesn't exist (migration)
+            try:
+                cursor.execute('ALTER TABLE feeds ADD COLUMN category TEXT DEFAULT NULL')
+                logger.info("Added category column to feeds table")
+            except sqlite3.OperationalError:
+                # Column already exists
+                pass
             
             conn.commit()
             logger.info("Database initialized successfully")
@@ -249,15 +257,16 @@ class DatabaseManager:
                 cursor = conn.cursor()
                 cursor.execute('''
                     INSERT OR REPLACE INTO feeds 
-                    (title, url, description, link, language, active)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    (title, url, description, link, language, active, category)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     feed_data.get('title'),
                     feed_data.get('url'),
                     feed_data.get('description'),
                     feed_data.get('link'),
                     feed_data.get('language', 'en'),
-                    True
+                    True,
+                    feed_data.get('category')
                 ))
                 return cursor.lastrowid
                 
@@ -277,6 +286,18 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Error getting feeds: {e}")
             return []
+    
+    def delete_feed(self, feed_id: int) -> bool:
+        """Delete an RSS feed."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute('DELETE FROM feeds WHERE id = ?', (feed_id,))
+                return cursor.rowcount > 0
+                
+        except Exception as e:
+            logger.error(f"Error deleting feed: {e}")
+            return False
     
     def _serialize_embedding(self, embedding: Optional[List[float]]) -> Optional[bytes]:
         """Serialize embedding vector to bytes."""

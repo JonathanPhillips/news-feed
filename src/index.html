@@ -73,6 +73,17 @@
             margin: 0 auto;
             padding: 2rem;
         }
+        
+        .articles-container {
+            padding: 0;
+        }
+        
+        /* Default list view */
+        .articles-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
 
         .loading {
             text-align: center;
@@ -379,6 +390,102 @@
 
         .status-online { background: #10b981; }
         .status-offline { background: #ef4444; }
+
+        .view-options {
+            display: flex;
+            gap: 0.25rem;
+            background: #f3f4f6;
+            padding: 0.25rem;
+            border-radius: 0.5rem;
+        }
+
+        .view-btn {
+            padding: 0.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: #6b7280;
+            border-radius: 0.25rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-btn:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .view-btn.active {
+            background: white;
+            color: #2563eb;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Grid view styles */
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+
+        .articles-grid .article {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .articles-grid .article-content {
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .articles-grid .article-actions {
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+
+        /* Compact view styles */
+        .articles-compact .article {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .articles-compact .article-title {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .articles-compact .article-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .articles-compact .article-content {
+            display: none;
+        }
+
+        .articles-compact .article-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .articles-compact .action-btn,
+        .articles-compact .ai-summary-btn,
+        .articles-compact .bias-analysis-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
         
         .preference-item {
             background: #f9fafb;
@@ -398,6 +505,76 @@
         .preference-category {
             font-weight: 600;
             color: #111827;
+            text-transform: capitalize;
+        }
+
+        .preference-tabs {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #6b7280;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: #374151;
+        }
+
+        .tab-btn.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .feed-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .feed-title {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .feed-url {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feed-category {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
             text-transform: capitalize;
         }
         
@@ -479,6 +656,35 @@
             <option value="fashion">Fashion</option>
             <option value="world">World</option>
         </select>
+        
+        <!-- View Options -->
+        <div class="view-options">
+            <button class="view-btn active" data-view="list" title="List View">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="0" y="1" width="16" height="3"></rect>
+                    <rect x="0" y="6" width="16" height="3"></rect>
+                    <rect x="0" y="11" width="16" height="3"></rect>
+                </svg>
+            </button>
+            <button class="view-btn" data-view="grid" title="Grid View">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="0" y="0" width="7" height="7"></rect>
+                    <rect x="9" y="0" width="7" height="7"></rect>
+                    <rect x="0" y="9" width="7" height="7"></rect>
+                    <rect x="9" y="9" width="7" height="7"></rect>
+                </svg>
+            </button>
+            <button class="view-btn" data-view="compact" title="Compact View">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="0" y="2" width="16" height="1"></rect>
+                    <rect x="0" y="5" width="16" height="1"></rect>
+                    <rect x="0" y="8" width="16" height="1"></rect>
+                    <rect x="0" y="11" width="16" height="1"></rect>
+                    <rect x="0" y="14" width="16" height="1"></rect>
+                </svg>
+            </button>
+        </div>
+        
         <div>
             <span class="status-indicator status-offline" id="statusIndicator"></span>
             <span id="statusText">Checking connection...</span>
@@ -487,7 +693,7 @@
 
     <main class="main-content">
         <div id="loading" class="loading">Loading articles...</div>
-        <div id="articlesContainer" class="article-grid" style="display: none;"></div>
+        <div id="articlesContainer" class="articles-container" style="display: none;"></div>
         <div id="noArticles" class="no-articles" style="display: none;">
             <h3>No articles found</h3>
             <p>Try refreshing the feeds or adjusting your filters.</p>
@@ -515,11 +721,45 @@
                 <span class="close">&times;</span>
             </div>
             <div id="preferencesContent">
-                <p style="margin-bottom: 1rem; color: #6b7280;">Set keywords for each category to boost relevant articles:</p>
-                <div id="preferencesList">
-                    <!-- Will be populated by JavaScript -->
+                <!-- Tabs for preferences -->
+                <div class="preference-tabs">
+                    <button id="keywordsTab" class="tab-btn active">🔍 Keywords</button>
+                    <button id="feedsTab" class="tab-btn">📡 RSS Feeds</button>
                 </div>
-                <button id="addPreferenceBtn" class="btn" style="margin-top: 1rem;">➕ Add New Preference</button>
+                
+                <!-- Keywords Tab -->
+                <div id="keywordsPanel" class="tab-panel active">
+                    <p style="margin-bottom: 1rem; color: #6b7280;">Set keywords for each category to boost relevant articles:</p>
+                    <div id="preferencesList">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <button id="addPreferenceBtn" class="btn" style="margin-top: 1rem;">➕ Add New Preference</button>
+                </div>
+                
+                <!-- Feeds Tab -->
+                <div id="feedsPanel" class="tab-panel">
+                    <p style="margin-bottom: 1rem; color: #6b7280;">Manage RSS feeds for each category:</p>
+                    <div id="feedsList">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <div class="add-feed-form" style="margin-top: 1rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem;">
+                        <h4>Add New RSS Feed</h4>
+                        <input type="url" id="newFeedUrl" placeholder="https://example.com/rss.xml" style="width: 100%; margin: 0.5rem 0; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                        <select id="newFeedCategory" style="width: 100%; margin: 0.5rem 0; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                            <option value="">Select Category</option>
+                            <option value="technology">Technology</option>
+                            <option value="politics">Politics</option>
+                            <option value="business">Business</option>
+                            <option value="science">Science</option>
+                            <option value="health">Health</option>
+                            <option value="sports">Sports</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="fashion">Fashion</option>
+                            <option value="world">World</option>
+                        </select>
+                        <button id="addFeedBtn" class="btn">➕ Add Feed</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -533,6 +773,7 @@
                     : '/api';
                 this.articles = [];
                 this.currentCategory = '';
+                this.currentView = 'list';
                 this.init();
                 this.setupModalEvents();
             }
@@ -552,6 +793,21 @@
                     this.loadArticles();
                 });
                 document.getElementById('addPreferenceBtn').addEventListener('click', () => this.addNewPreference());
+                
+                // Tab switching
+                document.getElementById('keywordsTab').addEventListener('click', () => this.switchTab('keywords'));
+                document.getElementById('feedsTab').addEventListener('click', () => this.switchTab('feeds'));
+                
+                // Feed management
+                document.getElementById('addFeedBtn').addEventListener('click', () => this.addNewFeed());
+                
+                // View mode switching
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const view = e.currentTarget.dataset.view;
+                        this.switchView(view);
+                    });
+                });
             }
 
             async checkHealth() {
@@ -639,12 +895,21 @@
                 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('noArticles').style.display = 'none';
-                container.style.display = 'grid';
+                container.style.display = 'block';
                 
-                container.innerHTML = this.articles.map(article => this.createArticleCard(article)).join('');
+                // Apply view mode class
+                container.className = `articles-container articles-${this.currentView}`;
+                
+                // Render based on view mode
+                if (this.currentView === 'compact') {
+                    container.innerHTML = this.articles.map(article => this.createCompactArticle(article)).join('');
+                } else {
+                    container.innerHTML = this.articles.map(article => this.createArticleCard(article)).join('');
+                }
                 
                 // Add click listeners
-                container.querySelectorAll('.article-card').forEach((card, index) => {
+                const cards = container.querySelectorAll('.article-card, .article');
+                cards.forEach((card, index) => {
                     card.addEventListener('click', () => this.openArticle(this.articles[index]));
                 });
             }
@@ -891,6 +1156,7 @@
             showPreferences() {
                 const modal = document.getElementById('preferencesModal');
                 this.renderPreferences();
+                this.loadFeeds();
                 modal.style.display = 'block';
             }
             
@@ -980,6 +1246,186 @@
                 } catch (error) {
                     console.error('Error deleting preference:', error);
                 }
+            }
+
+            switchTab(tabName) {
+                // Update tab buttons
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+                
+                if (tabName === 'keywords') {
+                    document.getElementById('keywordsTab').classList.add('active');
+                    document.getElementById('keywordsPanel').classList.add('active');
+                } else if (tabName === 'feeds') {
+                    document.getElementById('feedsTab').classList.add('active');
+                    document.getElementById('feedsPanel').classList.add('active');
+                }
+            }
+
+            async loadFeeds() {
+                try {
+                    const response = await fetch(`${this.apiUrl}/feeds`);
+                    this.feeds = await response.json();
+                    this.renderFeeds();
+                } catch (error) {
+                    console.error('Error loading feeds:', error);
+                    this.feeds = [];
+                }
+            }
+
+            renderFeeds() {
+                const container = document.getElementById('feedsList');
+                
+                if (!this.feeds || this.feeds.length === 0) {
+                    container.innerHTML = '<p style="color: #6b7280;">No RSS feeds configured yet.</p>';
+                    return;
+                }
+
+                // Group feeds by category
+                const feedsByCategory = {};
+                this.feeds.forEach(feed => {
+                    const category = feed.category || 'uncategorized';
+                    if (!feedsByCategory[category]) {
+                        feedsByCategory[category] = [];
+                    }
+                    feedsByCategory[category].push(feed);
+                });
+
+                container.innerHTML = Object.entries(feedsByCategory).map(([category, categoryFeeds]) => `
+                    <div class="feed-category-group">
+                        <h4 style="margin: 1rem 0 0.5rem 0; color: #374151; text-transform: capitalize;">${category}</h4>
+                        ${categoryFeeds.map(feed => `
+                            <div class="feed-item">
+                                <div class="feed-header">
+                                    <span class="feed-title">${feed.title || 'Unknown Feed'}</span>
+                                    <button class="delete-btn" onclick="newsApp.deleteFeed(${feed.id})">Delete</button>
+                                </div>
+                                <div class="feed-url">${feed.url}</div>
+                                <span class="feed-category">${category}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `).join('');
+            }
+
+            async addNewFeed() {
+                const url = document.getElementById('newFeedUrl').value.trim();
+                const category = document.getElementById('newFeedCategory').value;
+
+                if (!url || !category) {
+                    alert('Please enter both URL and category');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${this.apiUrl}/feeds`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url, category })
+                    });
+
+                    if (response.ok) {
+                        await this.loadFeeds();
+                        document.getElementById('newFeedUrl').value = '';
+                        document.getElementById('newFeedCategory').value = '';
+                        alert('RSS feed added successfully!');
+                    } else {
+                        const error = await response.text();
+                        alert(`Failed to add feed: ${error}`);
+                    }
+                } catch (error) {
+                    console.error('Error adding feed:', error);
+                    alert('Failed to add feed');
+                }
+            }
+
+            async deleteFeed(feedId) {
+                if (!confirm('Delete this RSS feed?')) return;
+
+                try {
+                    const response = await fetch(`${this.apiUrl}/feeds/${feedId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        await this.loadFeeds();
+                        alert('Feed deleted successfully!');
+                    } else {
+                        alert('Failed to delete feed');
+                    }
+                } catch (error) {
+                    console.error('Error deleting feed:', error);
+                    alert('Failed to delete feed');
+                }
+            }
+
+            switchView(view) {
+                this.currentView = view;
+                
+                // Update button states
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === view);
+                });
+                
+                // Re-render articles
+                this.renderArticles();
+            }
+
+            createCompactArticle(article) {
+                const readClass = article.read_status ? 'article-read' : '';
+                const categoryColor = this.getCategoryColor(article.category);
+                
+                return `
+                    <div class="article ${readClass}" data-id="${article.id}">
+                        <h3 class="article-title">
+                            <a href="${article.url}" target="_blank" rel="noopener noreferrer" 
+                               onclick="event.stopPropagation(); newsApp.markAsRead(${article.id})">
+                                ${article.title}
+                            </a>
+                        </h3>
+                        <div class="article-meta">
+                            <span class="category" style="background: ${categoryColor.bg}; color: ${categoryColor.text}">
+                                ${article.category || 'uncategorized'}
+                            </span>
+                            <span class="date">${new Date(article.published).toLocaleDateString()}</span>
+                            <span class="sentiment sentiment-${article.sentiment || 'neutral'}">
+                                ${article.sentiment || 'neutral'}
+                            </span>
+                        </div>
+                        <div class="article-actions">
+                            <button class="action-btn ${article.liked ? 'active' : ''}" 
+                                    onclick="event.stopPropagation(); newsApp.toggleLike(${article.id})"
+                                    title="Like">
+                                ${article.liked ? '❤️' : '🤍'} ${article.like_count || 0}
+                            </button>
+                            <button class="ai-summary-btn" 
+                                    onclick="event.stopPropagation(); newsApp.generateSummary(${article.id})"
+                                    title="Generate AI Summary">
+                                📝 Summary
+                            </button>
+                            <button class="bias-analysis-btn"
+                                    onclick="event.stopPropagation(); newsApp.showBiasAnalysis(${article.id})"
+                                    title="View Bias Analysis">
+                                ⚖️ Bias
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            getCategoryColor(category) {
+                const colors = {
+                    technology: { bg: '#dbeafe', text: '#1e40af' },
+                    politics: { bg: '#fce7f3', text: '#be185d' },
+                    business: { bg: '#d1fae5', text: '#065f46' },
+                    science: { bg: '#e9d5ff', text: '#7c3aed' },
+                    health: { bg: '#fed7aa', text: '#c2410c' },
+                    sports: { bg: '#fef3c7', text: '#d97706' },
+                    entertainment: { bg: '#f3e8ff', text: '#9333ea' },
+                    fashion: { bg: '#ffe4e6', text: '#e11d48' },
+                    world: { bg: '#ccfbf1', text: '#134e4a' }
+                };
+                return colors[category] || { bg: '#f3f4f6', text: '#374151' };
             }
         }
 

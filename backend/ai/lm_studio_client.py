@@ -182,6 +182,12 @@ Respond only with valid JSON, no other text."""
                     result_text = result_text[start:end]
                 
                 result = json.loads(result_text)
+                
+                # Fix bias_reasoning if it's a dict (convert to string)
+                if isinstance(result.get('bias_reasoning'), dict):
+                    reasoning_dict = result['bias_reasoning']
+                    result['bias_reasoning'] = ". ".join([f"{k}: {v}" for k, v in reasoning_dict.items()])
+                
                 return result
             else:
                 raise Exception(f"HTTP {response.status_code}")
