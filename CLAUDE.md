@@ -2,6 +2,22 @@
 
 An intelligent news reader that learns your preferences and filters content using local AI.
 
+
+## Recent Accomplishments
+
+*Log major tasks, features, and fixes with timestamps for daily log automation*
+
+- **2025-07-27**: Major RSS Feed Management & View Options Update (Commit: 9942994)
+  - **RSS Feed Management**: Added complete feed management system with category assignment via Preferences → RSS Feeds tab
+  - **View Options**: Implemented List, Grid, and Compact view modes with toggle buttons for different article display preferences
+  - **Quality Content Sources**: Added premium RSS feeds (ESPN, Yahoo Sports, Vogue, Harper's Bazaar, Elle, Fashionista, etc.)
+  - **AI Categorization Fixes**: Resolved bias_reasoning dict→string conversion bug in lm_studio_client.py
+  - **Backend Enhancements**: Added DELETE /feeds/{id} endpoint, category column to feeds table, improved error handling
+  - **Real Content Success**: Sports category now shows 6+ real articles, Fashion category displays real Vogue content
+  - **UI/UX Improvements**: Tabbed preferences interface, compact view for quick article scanning, responsive design updates
+  - **Bug Fixes**: Fixed 422 validation errors, database insertion issues, article rendering for different view modes
+- 2025-07-27: Added accomplishment logging framework to CLAUDE.md
+
 ## Project Overview
 
 **Problem:** Traditional RSS readers like Feedly have poor signal-to-noise ratio (80-90% unwanted content) and require manual feed management.
@@ -29,7 +45,11 @@ An intelligent news reader that learns your preferences and filters content usin
 - **Smart Categorization:** Auto-categorize articles (technology, politics, business, science, health, sports, entertainment, fashion, world)
 - **Political Bias Detection:** -1.0 to 1.0 scale with confidence levels and detailed reasoning
 - **AI Summaries:** On-demand article summarization
-- **Custom Preferences:** Keyword-based topic boosting per category
+- **Custom Preferences:** Keyword-based topic boosting per category with tabbed interface
+- **RSS Feed Management:** Add/delete feeds with category assignment via web interface
+- **View Options:** List, Grid, and Compact display modes for different reading preferences
+- **Read/Unread Tracking:** Mark articles as read with status indicators
+- **Premium Content Sources:** ESPN, Yahoo Sports, Vogue, Harper's Bazaar, Elle, and other quality feeds
 - **Sentiment Analysis:** Positive/negative/neutral detection
 - **Importance Scoring:** High/medium/low priority
 - **User Interactions:** Like/dislike feedback system
@@ -127,7 +147,10 @@ news_feed/
 - [x] Health monitoring
 - [x] Environment-based configuration
 
-### Phase 4: Advanced Features 📋 TODO
+### Phase 4: Advanced Features 📋 IN PROGRESS
+- [x] RSS feed management system with categories ✅
+- [x] Read/unread tracking ✅
+- [x] Multiple view modes (List/Grid/Compact) ✅
 - [ ] Tauri desktop application
 - [ ] RSS feed discovery system
 - [ ] Similar article clustering
@@ -136,7 +159,6 @@ news_feed/
 - [ ] Multiple user profiles
 - [ ] Offline reading mode
 - [ ] Scheduled feed updates
-- [ ] Read/unread tracking
 - [ ] Archive system
 
 ## API Endpoints
@@ -148,8 +170,9 @@ news_feed/
 - `POST /articles/{id}/interact` - Record user interaction
 
 ### Feeds
-- `GET /feeds` - Get all active RSS feeds
-- `POST /feeds` - Add a new RSS feed
+- `GET /feeds` - Get all active RSS feeds with category information
+- `POST /feeds` - Add a new RSS feed with category assignment
+- `DELETE /feeds/{id}` - Delete an RSS feed
 - `POST /refresh` - Refresh all feeds with AI processing
 
 ### Preferences
@@ -198,9 +221,9 @@ If running in WSL, the app will automatically detect the Windows host IP and con
 - **Solution:** Enable "Network Access" and "CORS" in LM Studio settings
 - Backend auto-detects Windows host IP
 
-### 422 Unprocessable Entity on Interactions
+### 422 Unprocessable Entity on Interactions ✅ FIXED
 - **Issue:** FastAPI validation error on interaction endpoints
-- **TODO:** Fix request body validation in interaction endpoint
+- **Solution:** Added Pydantic models for request validation in main.py
 
 ## Notes
 
@@ -209,3 +232,12 @@ If running in WSL, the app will automatically detect the Windows host IP and con
 - Political bias detection includes detailed reasoning
 - Docker deployment recommended for stability
 - Database persists in `./data/news_feed.db`
+
+## Accomplishment Logging Guidelines
+
+When working on this project, Claude Code should update the "Recent Accomplishments" section with:
+- Date in YYYY-MM-DD format
+- Brief description of what was accomplished
+- File references when relevant (e.g., "Fixed bug in parser.py:45")
+- Commit hashes for significant changes
+- Deployment or release information
